@@ -1,71 +1,113 @@
+import logging
 import tkinter as tk
+from tkinter import scrolledtext as tkst
 
 from io import StringIO
 import sys
 
-
 from simulation.world import World
 from simulation.life import *
+WORLD_DIMENSION = (30, 30)
 
-WORLD_DIMENSION = (20, 20)
-TURNS = 20
+logging.basicConfig(level=logging.DEBUG)
 
-world = World(WORLD_DIMENSION)
 
-factory = OrganismFactory(WORLD_DIMENSION)
+class TextHandler(logging.Handler):
+    """This class allows you to log to a Tkinter Text or ScrolledText widget"""
 
-world.organisms += list(factory.generate(Organism, 5))
-world.organisms += list(factory.generate(Plant, 5))
-world.organisms += list(factory.generate(Animal, 5))
-world.organisms += list(factory.generate(Wolf, 5))
+    def __init__(self, text):
+        # run the regular Handler __init__
+        logging.Handler.__init__(self)
+        # Store a reference to the Text it will log to
+        self.text = text
 
+    def emit(self, record):
+        msg = self.format(record)
+
+        def append():
+            self.text.configure(state="normal")
+            self.text.insert(tk.END, msg + "\n")
+            self.text.configure(state="disabled")
+            # Autoscroll to the bottom
+            self.text.yview(tk.END)
+
+        # This is necessary because we can't modify the Text from other threads
+        self.text.after(0, append)
 
 
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
+
         self.pack()
         self.create_widgets()
 
     def create_widgets(self):
 
-        self.entrythingy = tk.Entry()
-        self.entrythingy.pack()
+        self.turn_btn = tk.Button(self)
+        self.turn_btn["text"] = "TURN ME ON"
+        self.turn_btn["command"] = self.turn
+        self.turn_btn.pack(side="bottom")
 
-        # here is the application variable
-        self.contents = tk.StringVar()
-        # set it to some value
-        self.contents.set('huh')
-        # tell the entry widget to watch this variable
-        self.entrythingy["textvariable"] = self.contents
+        self.quit_btn = tk.Button(self, text="QUIT", fg="red", command=root.destroy)
+        self.quit_btn.pack(side="bottom")
 
-        self.hi_there = tk.Button(self)
-        self.hi_there["text"] = "Hello World\n(click me)"
-        self.hi_there["command"] = self.turn
-        self.hi_there.pack(side="top")
+        self.board_diplay = tkst.ScrolledText(self, state="disabled")
+        self.board_diplay.configure(font="TkFixedFont")
+        self.board_diplay.pack(side="right")
 
-        self.quit = tk.Button(self, text="QUIT", fg="red",
-                              command=root.destroy)
-        self.quit.pack(side="bottom")
+    def create_world(self):
+        world = World(WORLD_DIMENSION)
 
-    def say_hi(self):
-        print("hi there, everyone!")
+        factory = OrganismFactory(WORLD_DIMENSION)
+
+        for o in factory.generate(Plant, 10):
+            world.board.place_org(o)
+
+        for o in factory.generate(SuperPlant, 3):
+            world.board.place_org(o)
+
+        for o in factory.generate(Animal, 15):
+            world.board.place_org(o)
+
+        self.world = world
+        self.update_board()
 
     def turn(self):
-        world.turn()
+        self.world.turn()
+        self.turn_btn["text"] = "TURN {}".format(self.world.turn_count)
+        self.update_board()
 
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
+    def update_board(self):
+        # crude hack, get board from stdout
+        default_stdout = sys.stdout
+        sys.stdout = board_stdout = StringIO()
+        self.world.print_board()
+        sys.stdout = default_stdout
 
-        world.print_board()
+        # update board
+        self.board_diplay.config(state=tk.NORMAL)
+        self.board_diplay.delete(1.0, tk.END)
+        self.board_diplay.insert(tk.END, board_stdout.getvalue())
+        self.board_diplay.config(state=tk.DISABLED)
+        
 
-        sys.stdout = old_stdout
 
-        self.contents.set(mystdout.getvalue())  
+if __name__ == "__main__":
 
+    root = tk.Tk()
+    app = Application(master=root)
 
+    st = tkst.ScrolledText(app, state="disabled")
+    st.configure(font="TkFixedFont")
+    st.pack()
 
+    # Create textLogger
+    text_handler = TextHandler(st)
 
-root = tk.Tk()
-app = Application(master=root)
-app.mainloop()
+    # Add the handler to logger
+    logger = logging.getLogger()
+    logger.addHandler(text_handler)
+
+    app.create_world()
+    app.mainloop()

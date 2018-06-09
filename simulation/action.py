@@ -1,25 +1,48 @@
+import logging
+import random
+
+logger = logging.getLogger(__name__)
+
 class Action(object):
     """docstring for ClassName"""
-    def __init__(self):
-        self.caller = None
+
+    def __init__(self, caller):
+        self.caller = caller
 
     def __repr__(self):
         return "{}()".format(self.__class__.__name__)
 
-    def execute():
-        print('did nothing')
+    def execute(self, board):
+        logger.info("%r -> %r", self.caller, self)
+
 
 class DoNothing(Action):
-    pass
+    def execute(self, board):
+        logger.info("%r -> %r", self.caller, self)
+
 
 class Move(Action):
-    pass
+    def execute(self, board):
+        logger.info("%r -> %r", self.caller, self)
+
+        start = self.caller.position
+        end = random.choice(start.neighbours)
+        board.move(start, end)
+
 
 class Spread(Action):
-    pass
+    def execute(self, board):
+        if random.randint(0,100) < self.caller.spread_chance:
+            logger.info("%r -> %r", self.caller, self)
+            start = self.caller.position
+            position = random.choice(start.neighbours)
+            child = self.caller.__class__(position)
+
+            board.place_org(child)
+
 
 class SuperSpread(Spread):
-    def execute(self):
-        super(SuperSpread, self).execute()
-        super(SuperSpread, self).execute()
-        super(SuperSpread, self).execute()
+    def execute(self, board):
+        super(SuperSpread, self).execute(board)
+        super(SuperSpread, self).execute(board)
+        super(SuperSpread, self).execute(board)

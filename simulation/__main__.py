@@ -1,20 +1,27 @@
+import logging
+
 from simulation.world import World
 from simulation.life import *
 
-WORLD_DIMENSION = (20, 20)
-TURNS = 20
+logging.basicConfig(level=logging.DEBUG)
 
-if __name__ == '__main__':
+logger = logging.getLogger(__name__)
+
+WORLD_DIMENSION = (20, 20)
+TURNS = 3
+
+if __name__ == "__main__":
     world = World(WORLD_DIMENSION)
 
     factory = OrganismFactory(WORLD_DIMENSION)
 
-    world.organisms += list(factory.generate(Organism, 5))
-    world.organisms += list(factory.generate(Plant, 5))
-    world.organisms += list(factory.generate(Animal, 5))
-    world.organisms += list(factory.generate(Wolf, 5))
+    for o in factory.generate(Plant, 5):
+        world.board.place_org(o)
 
+    for o in factory.generate(Animal, 5):
+        world.board.place_org(o)
 
-    for _ in range(TURNS):
+    for turn in range(TURNS):
+        print("T: {}".format(turn))
         world.turn()
         world.print_board()
