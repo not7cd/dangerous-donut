@@ -7,10 +7,10 @@ class HexaCanvas(Canvas):
     def __init__(self, master, *args, **kwargs):
         Canvas.__init__(self, master, *args, **kwargs)
 
-        self.hexaSize = 20
+        self.hexa_size = 20
 
-    def setHexaSize(self, number):
-        self.hexaSize = number
+    def set_hexa_size(self, number):
+        self.hexa_size = number
 
     def create_hexagone(
         self,
@@ -54,28 +54,28 @@ class HexaCanvas(Canvas):
                     6
 
         """
-        size = self.hexaSize
-        Δx = (size ** 2 - (size / 2) ** 2) ** 0.5
+        size = self.hexa_size
+        δx = (size ** 2 - (size / 2) ** 2) ** 0.5
 
-        point1 = (x + Δx, y + size / 2)
-        point2 = (x + Δx, y - size / 2)
+        point1 = (x + δx, y + size / 2)
+        point2 = (x + δx, y - size / 2)
         point3 = (x, y - size)
-        point4 = (x - Δx, y - size / 2)
-        point5 = (x - Δx, y + size / 2)
+        point4 = (x - δx, y - size / 2)
+        point5 = (x - δx, y + size / 2)
         point6 = (x, y + size)
 
         # this setting allow to specify a different color for each side.
-        if color1 == None:
+        if color1 is None:
             color1 = color
-        if color2 == None:
+        if color2 is None:
             color2 = color
-        if color3 == None:
+        if color3 is None:
             color3 = color
-        if color4 == None:
+        if color4 is None:
             color4 = color
-        if color5 == None:
+        if color5 is None:
             color5 = color
-        if color6 == None:
+        if color6 is None:
             color6 = color
 
         self.create_line(point1, point2, fill=color1, width=2)
@@ -85,7 +85,7 @@ class HexaCanvas(Canvas):
         self.create_line(point5, point6, fill=color5, width=2)
         self.create_line(point6, point1, fill=color6, width=2)
 
-        if fill != None:
+        if fill is not None:
             self.create_polygon(
                 point1, point2, point3, point4, point5, point6, fill=fill
             )
@@ -96,8 +96,8 @@ class HexagonalGrid(HexaCanvas):
 
     def __init__(self, master, scale, grid_width, grid_height, *args, **kwargs):
 
-        Δx = (scale ** 2 - (scale / 2.0) ** 2) ** 0.5
-        width = 2 * Δx * grid_width + Δx
+        δx = (scale ** 2 - (scale / 2.0) ** 2) ** 0.5
+        width = 2 * δx * grid_width + δx
         height = 1.5 * scale * grid_height + 0.5 * scale
 
         HexaCanvas.__init__(
@@ -109,45 +109,52 @@ class HexagonalGrid(HexaCanvas):
             *args,
             **kwargs
         )
-        self.setHexaSize(scale)
+        self.set_hexa_size(scale)
 
-    def setCell(self, xCell, yCell, *args, **kwargs):
-        """ Create a content in the cell of coordinates x and y. Could specify options throught keywords : color, fill, color1, color2, color3, color4; color5, color6"""
+    def set_cell(self, x_cell, y_cell, *args, **kwargs):
+        """
+        Create a content in the cell of coordinates x and y.
+        :param x_cell:
+        :param y_cell:
+        :param args:
+        :param kwargs:
+        :return:
+        """
 
         # compute pixel coordinate of the center of the cell:
-        size = self.hexaSize
-        Δx = (size ** 2 - (size / 2) ** 2) ** 0.5
+        size = self.hexa_size
+        δx = (size ** 2 - (size / 2) ** 2) ** 0.5
 
-        pix_x = Δx + 2 * Δx * xCell
-        if yCell % 2 == 1:
-            pix_x += Δx
+        pix_x = δx + 2 * δx * x_cell
+        if y_cell % 2 == 1:
+            pix_x += δx
 
-        pix_y = size + yCell * 1.5 * size
+        pix_y = size + y_cell * 1.5 * size
 
         self.create_hexagone(pix_x, pix_y, *args, **kwargs)
 
 
 if __name__ == "__main__":
-    tk = Tk()
+    root = Tk()
 
-    grid = HexagonalGrid(tk, scale=50, grid_width=4, grid_height=4)
+    grid = HexagonalGrid(root, scale=50, grid_width=4, grid_height=4)
     grid.grid(row=0, column=0, padx=5, pady=5)
 
     def correct_quit(tk):
         tk.destroy()
         tk.quit()
 
-    quit = Button(tk, text="Quit", command=lambda: correct_quit(tk))
-    quit.grid(row=1, column=0)
+    quit_btn = Button(root, text="Quit", command=lambda: correct_quit(root))
+    quit_btn.grid(row=1, column=0)
 
-    grid.setCell(0, 0, fill="blue")
-    grid.setCell(1, 0, fill="red")
-    grid.setCell(0, 1, fill="green")
-    grid.setCell(1, 1, fill="yellow")
-    grid.setCell(2, 0, fill="cyan")
-    grid.setCell(0, 2, fill="teal")
-    grid.setCell(2, 1, fill="silver")
-    grid.setCell(1, 2, fill="white")
-    grid.setCell(2, 2, fill="gray")
+    grid.set_cell(0, 0, fill="blue")
+    grid.set_cell(1, 0, fill="red")
+    grid.set_cell(0, 1, fill="green")
+    grid.set_cell(1, 1, fill="yellow")
+    grid.set_cell(2, 0, fill="cyan")
+    grid.set_cell(0, 2, fill="teal")
+    grid.set_cell(2, 1, fill="silver")
+    grid.set_cell(1, 2, fill="white")
+    grid.set_cell(2, 2, fill="gray")
 
-    tk.mainloop()
+    root.mainloop()

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: inherit from dict
-class Board():
+class Board:
     """
     Container for organisms
     """
@@ -18,22 +18,22 @@ class Board():
         self.dimensions = dimensions
         self.organisms = {}
 
-
-    def _hande_dimension_warparound(self, numbery_boi, dimension):
-        if numbery_boi < 0:
-            return numbery_boi + dimension
-        elif numbery_boi >= dimension:
-            return numbery_boi - dimension
+    @staticmethod
+    def _handle_dimension_warparound(x, dimension):
+        if x < 0:
+            return x + dimension
+        elif x >= dimension:
+            return x - dimension
         else:
-            return numbery_boi
+            return x
 
     def handle_warparound(self, coord):
         """
         :coord: any coordinate
         :return: coordinate in bounds wraped around
         """
-        x = self._hande_dimension_warparound(coord.x, self.dimensions[0])
-        y = self._hande_dimension_warparound(coord.y, self.dimensions[1])
+        x = self._handle_dimension_warparound(coord.x, self.dimensions[0])
+        y = self._handle_dimension_warparound(coord.y, self.dimensions[1])
         new_coord = Coord(x, y)
 
         if coord != new_coord:
@@ -53,12 +53,9 @@ class Board():
                 raise Exception("%r %s", org, coord)
             return org
 
-    def get_by_class(self, cls):
-        pass
-
     def put_on_coord(self, coord, org):
         """
-        Just put, can ovewrite position
+        Just put, can overwrite position
         """
         if self.wraparound:
             coord = self.handle_warparound(coord)
@@ -115,9 +112,7 @@ class Board():
         """
         :return: 
         """
-        return sorted(
-            self.entities(), key=lambda org: (-org.initiative, -org.age)
-        )
+        return sorted(self.entities(), key=lambda org: (-org.initiative, -org.age))
 
 
 class World:
@@ -145,7 +140,7 @@ class World:
                     logger.error("%s during %r", e, action)
                     raise e
             else:
-                logger.info("%r is dead", organism)
+                logger.info("%r is dead, moving on", organism)
 
         # TODO this hack
         for organism in self.board.entities():
@@ -171,21 +166,13 @@ class World:
 
     def generate(self):
         factory = OrganismFactory(self.dimensions)
+        factory.register(Grass, 5)
+        factory.register(Dandelion, 1)
+        factory.register(Wolf, 5)
+        factory.register(Sheep, 5)
 
-        for o in factory.generate(Plant, 5):
+        for org in factory.generate_registered():
             try:
-                self.board.place_org(o)
-            except Exception as e:
-                logger.error(e)
-
-        for o in factory.generate(Dandelion, 1):
-            try:
-                self.board.place_org(o)
-            except Exception as e:
-                logger.error(e)
-
-        for o in factory.generate(Animal, 5):
-            try:
-                self.board.place_org(o)
-            except Exception as e:
-                logger.error(e)
+                self.board.place_org(org)
+            except OccupiedFieldException:
+                logger.error("Position occupied, won't generate %r", org)

@@ -43,7 +43,7 @@ class Move(Action):
             logger.debug("%r starts fight with %r", self.caller, target)
             fight.execute(board)
 
-        # is alive        
+        # is alive
         if self.caller is not None:
             try:
                 board.move(start_position, target_position)
@@ -87,6 +87,6 @@ class Spread(Action):
 
 class SuperSpread(Spread):
     def execute(self, board):
-        super(SuperSpread   , self).execute(board)
+        super(SuperSpread, self).execute(board)
         super(SuperSpread, self).execute(board)
         super(SuperSpread, self).execute(board)

@@ -32,6 +32,7 @@ def test_Board():
     assert board.get_by_coord(co.GridCoordinate(1, 1)) is org
     assert board.get_by_coord(co.GridCoordinate(0, 0)) is None
 
+
 def test_Board_is_occupied():
     DIMENSIONS = (5, 5)
     board = world.Board(DIMENSIONS)
@@ -41,4 +42,3 @@ def test_Board_is_occupied():
 
     assert board.is_occupied(co.GridCoordinate(0, 0)) is True
     assert board.is_occupied(co.GridCoordinate(1, 1)) is False
-

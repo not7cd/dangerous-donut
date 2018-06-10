@@ -2,6 +2,7 @@ from abc import *
 import numpy as np
 
 GRID_DIRECTIONS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+HEX_OFFSET_DIRECTIONS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
 
 
 class Coordinate(ABC):
