@@ -4,8 +4,8 @@ import tkinter.ttk as ttk
 from tkinter import scrolledtext as tkst
 
 from gui import Dialog, TextHandler
-from simulation.world import World
 from simulation.coordinate import GridCoordinate as Coord
+from simulation.world import World
 
 WORLD_DIMENSION = (5, 5)
 

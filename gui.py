@@ -1,6 +1,6 @@
-from abc import abstractmethod
-import tkinter as tk
 import logging
+import tkinter as tk
+from abc import abstractmethod
 
 
 class Dialog(tk.Toplevel):
