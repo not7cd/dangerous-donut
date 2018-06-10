@@ -1,18 +1,9 @@
-from abc import *
-import logging
-import random
 from simulation.action import *
 from simulation.coordinate import GridCoordinate as Coord
-from simulation.helpers import with_surrogates, color_from_string
+from simulation.helpers import with_surrogates
 
 # mappinf for ascii to emoji
-ASCII_EMOJI = {
-    "o": "🐛",
-    "p": "🌱",
-    "A": "🐾",
-    "W": "🐺",
-    "d": "🌼"
-}
+ASCII_EMOJI = {"o": "🐛", "p": "🌱", "A": "🐾", "W": "🐺", "d": "🌼"}
 
 MODE = "ascii"
 
@@ -21,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Organism(ABC):
     """docstring for Organism"""
+
     @abstractmethod
     def __init__(self, position):
         self.position = position
@@ -31,7 +23,6 @@ class Organism(ABC):
         self.alive = True
 
         self.ascii_repr = "o"
-        self.color = color_from_string(self.__class__.__name__)
 
     def __repr__(self):
         return "{}({}, {}, {})".format(
@@ -49,12 +40,14 @@ class Organism(ABC):
     def action(self):
         return DoNothing(self)
 
+    # TODO: collision
+
 
 class Plant(Organism, ABC):
     @abstractmethod
     def __init__(self, position):
         super(Plant, self).__init__(position)
-        self.spread_chance = 33
+        self.spread_chance = 25
         self.ascii_repr = "p"
 
     @abstractmethod
@@ -73,54 +66,12 @@ class Animal(Organism, ABC):
         return Move(self)
 
 
-class Grass(Plant):
-    def __init__(self, position):
-        super(Grass, self).__init__(position)
-        self.ascii_repr = ","
-        self.spread_chance = 33
-
-    def action(self):
-        return super(Grass, self).action()
-
-
-class Dandelion(Plant):
-    def __init__(self, position):
-        super(Dandelion, self).__init__(position)
-        self.ascii_repr = "d"
-        self.spread_chance = 33
-
-    def action(self):
-        return SuperSpread(self)
-
-
-class Sheep(Animal):
-    def __init__(self, position):
-        super(Sheep, self).__init__(position)
-        self.ascii_repr = "S"
-        self.initiative = 4
-        self.strength = 4
-
-    def action(self):
-        return super(Sheep, self).action()
-
-
-class Wolf(Animal):
-    def __init__(self, position):
-        super(Wolf, self).__init__(position)
-        self.ascii_repr = "W"
-        self.initiative = 5
-        self.strength = 9
-
-    def action(self):
-        return super(Wolf, self).action()
-
-
 class OrganismFactory:
     """docstring for OrganismFactory"""
 
     def __init__(self, dimensions):
         self.dimensions = dimensions
-        self.organisms = []
+        self.organisms_qty = []
 
     def register(self, organism, qty):
         """
@@ -129,7 +80,11 @@ class OrganismFactory:
         :param qty:
         :return:
         """
-        self.organisms.append((organism, qty))
+        self.organisms_qty.append((organism, qty))
+
+    @property
+    def organisms(self):
+        return [org for org, qty in self.organisms_qty]
 
     def position_generator(self, number):
         for _ in range(number):
@@ -143,6 +98,6 @@ class OrganismFactory:
             yield organism(position=self.random_position())
 
     def generate_registered(self):
-        for org, qty in self.organisms:
+        for org, qty in self.organisms_qty:
             for _ in range(qty):
                 yield org(position=self.random_position())

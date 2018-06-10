@@ -43,8 +43,7 @@ class Move(Action):
             logger.debug("%r starts fight with %r", self.caller, target)
             fight.execute(board)
 
-        # is alive
-        if self.caller is not None:
+        if self.caller.alive:
             try:
                 board.move(start_position, target_position)
             except OccupiedFieldException as e:

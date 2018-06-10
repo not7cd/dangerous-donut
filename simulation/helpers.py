@@ -21,4 +21,4 @@ def color_from_string(string):
     g = hash(string + "g")
     b = hash(string + "b")
 
-    return "#%02x%02x%02x" % (r % 256, g % 256, b % 256)
+    return "#%02x%02x%02x" % (r % 200 + 50, g % 200 + 50, b % 200 + 50)

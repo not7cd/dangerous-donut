@@ -1,6 +1,10 @@
 import logging
 import tkinter as tk
+from tkinter import ttk
 from abc import abstractmethod
+from simulation.helpers import color_from_string
+
+logger = logging.getLogger(__name__)
 
 
 class Dialog(tk.Toplevel):
@@ -125,3 +129,16 @@ class TextHandler(logging.Handler):
 
         # This is necessary because we can't modify the Text from other threads
         self.text.after(0, append)
+
+
+class OrganismStyler:
+    def __init__(self, organisms):
+        self.styles = []
+        for organism in organisms:
+            logger.debug("Generated {}.Board.TButton".format(organism.__name__))
+            self.styles.append(
+                ttk.Style().configure(
+                    "{}.Board.TButton".format(organism.__name__),
+                    foreground=color_from_string(organism.__name__),
+                )
+            )

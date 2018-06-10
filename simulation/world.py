@@ -2,7 +2,7 @@ import logging
 
 from simulation.errors import OccupiedFieldException
 from simulation.coordinate import GridCoordinate as Coord, Coordinate
-from simulation.life import *
+import simulation.life as life
 
 logger = logging.getLogger(__name__)
 
@@ -118,8 +118,9 @@ class Board:
 class World:
     """docstring for World"""
 
-    def __init__(self, dimensions):
+    def __init__(self, dimensions, factory=None):
         self.dimensions = dimensions
+        self.factory = factory
         self.board = Board(dimensions, wraparound=True)
         self.turn_count = 0
 
@@ -142,7 +143,7 @@ class World:
             else:
                 logger.info("%r is dead, moving on", organism)
 
-        # TODO this hack
+        # TODO wtf is this hack
         for organism in list(self.board.entities()):
             if not organism.alive:
                 logger.debug("deleting %r", self.board.get_by_coord(organism.position))
@@ -165,11 +166,21 @@ class World:
             print("")
 
     def generate(self):
-        factory = OrganismFactory(self.dimensions)
-        factory.register(Grass, 5)
-        factory.register(Dandelion, 1)
-        factory.register(Wolf, 5)
-        factory.register(Sheep, 10)
+        """
+        Populates world with worlds factory, if doesnt exist will create own
+        :return:
+        """
+        if self.factory is None:
+            factory = self.factory = life.OrganismFactory(self.dimensions)
+        else:
+            factory = self.factory
+
+        factory.register(life.Grass, 5)
+        factory.register(life.Dandelion, 1)
+        factory.register(life.Wolf, 5)
+        factory.register(life.Sheep, 10)
+        factory.register(life.Belladonna, 3)
+        factory.register(life.Guarana, 3)
 
         for org in factory.generate_registered():
             try:

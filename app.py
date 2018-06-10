@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import scrolledtext as tkst
 
-from gui import Dialog, TextHandler
+from gui import Dialog, TextHandler, OrganismStyler
 from simulation.coordinate import GridCoordinate as Coord
 from simulation.world import World
 
@@ -82,9 +82,12 @@ class WorldBoard(tk.Frame):
             if board.is_occupied(coord):
                 organism = board.get_by_coord(coord)
                 self.btns[coord]["text"] = str(organism)
-                # self.btns[coord]["fg"] = organism.color
+                self.btns[coord]["style"] = "{}.Board.TButton".format(
+                    organism.__class__.__name__
+                )
             else:
                 self.btns[coord]["text"] = " "
+                self.btns[coord]["style"] = "Board.TButton"
 
 
 class Application(tk.Frame):
@@ -104,8 +107,7 @@ class Application(tk.Frame):
     def create_widgets(self):
         """create and bind control buttons and place them"""
         self.turn_btn = tk.Button(self, text="TURN", command=self.turn)
-        self.quit_btn = tk.Button(self, text="QUIT", fg="red",
-                                  command=root.destroy)
+        self.quit_btn = tk.Button(self, text="QUIT", fg="red", command=root.destroy)
 
         self.logging_stext = tkst.ScrolledText(self, state="disabled")
         self.logging_stext.configure(font="TkDefaultFont")
@@ -121,6 +123,8 @@ class Application(tk.Frame):
 
         world = World(dimensions)
         world.generate()
+
+        OrganismStyler(world.factory.organisms)
 
         self.world = world
 
@@ -142,7 +146,7 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     ttk.Style().configure(
-        "TButton", padding=1, width=2, height=15, relief="flat", background="green"
+        "TButton", padding=1, width=2, height=15, relief="flat", background="#002200"
     )
 
     app = Application(master=root)
