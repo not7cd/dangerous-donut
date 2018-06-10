@@ -143,7 +143,7 @@ class World:
                 logger.info("%r is dead, moving on", organism)
 
         # TODO this hack
-        for organism in self.board.entities():
+        for organism in list(self.board.entities()):
             if not organism.alive:
                 logger.debug("deleting %r", self.board.get_by_coord(organism.position))
                 self.board.remove(organism.position)
@@ -169,7 +169,7 @@ class World:
         factory.register(Grass, 5)
         factory.register(Dandelion, 1)
         factory.register(Wolf, 5)
-        factory.register(Sheep, 5)
+        factory.register(Sheep, 10)
 
         for org in factory.generate_registered():
             try:

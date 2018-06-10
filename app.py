@@ -84,7 +84,7 @@ class WorldBoard(tk.Frame):
                 self.btns[coord]["text"] = str(organism)
                 # self.btns[coord]["fg"] = organism.color
             else:
-                self.btns[coord]["text"] = "."
+                self.btns[coord]["text"] = " "
 
 
 class Application(tk.Frame):
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     root = tk.Tk()
     ttk.Style().configure(
-        "TButton", padding=1, width=1, height=15, relief="flat", background="green"
+        "TButton", padding=1, width=2, height=15, relief="flat", background="green"
     )
 
     app = Application(master=root)

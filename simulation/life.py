@@ -54,8 +54,6 @@ class Plant(Organism, ABC):
     @abstractmethod
     def __init__(self, position):
         super(Plant, self).__init__(position)
-        self.strength = 0
-        self.initiative = 0
         self.spread_chance = 33
         self.ascii_repr = "p"
 
@@ -69,8 +67,6 @@ class Animal(Organism, ABC):
     def __init__(self, position):
         super(Animal, self).__init__(position)
         self.ascii_repr = "A"
-        self.initiative = 1
-        self.strength = 5
 
     @abstractmethod
     def action(self):
