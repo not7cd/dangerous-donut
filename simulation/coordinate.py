@@ -12,12 +12,14 @@ class Coordinate(ABC):
         pass
 
     @property
+    @abstractmethod
     def directions():
         """
         :return: list of all possible directions
         """
         pass
 
+    @property
     @abstractmethod
     def neighbours(self):
         """

@@ -1,0 +1,2 @@
+class OccupiedFieldException(Exception):
+    pass

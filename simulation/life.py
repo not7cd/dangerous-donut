@@ -1,9 +1,11 @@
+from abc import *
 import logging
 import random
 from simulation.action import *
 from simulation.coordinate import GridCoordinate as Coord
+from simulation.helpers import with_surrogates, color_from_string
 
-EMOJI = "🐛🌱🐾🐺S"
+EMOJI = "🐛🌱🐾🐺🌼"
 ASCII = "OPAWS"
 
 MODE = "ascii"
@@ -11,15 +13,18 @@ MODE = "ascii"
 logger = logging.getLogger(__name__)
 
 
-class Organism:
+class Organism(ABC):
     """docstring for Organism"""
 
     def __init__(self, position):
         self.age = 0
         self.initiative = 0
         self.position = position
+        self.strength = 0
+        self.alive = True
 
         self.repr_id = 0
+        self.color = color_from_string(self.__class__.__name__)
 
     def __repr__(self):
         return "{}({}, {}, {})".format(
@@ -27,10 +32,12 @@ class Organism:
         )
 
     def __str__(self):
-        return EMOJI[self.repr_id] if MODE == "emoji" else ASCII[self.repr_id]
+        return with_surrogates(EMOJI[self.repr_id]) if MODE == "emoji" else ASCII[self.repr_id]
 
+    @abstractmethod
     def action(self):
         return DoNothing(self)
+    
 
 
 class Plant(Organism):
@@ -48,6 +55,7 @@ class Animal(Organism):
         super(Animal, self).__init__(position)
         self.initiative = 1
         self.repr_id = 2
+        self.strength = 5
 
     def action(self):
         return Move(self)
@@ -59,14 +67,17 @@ class Wolf(Animal):
         self.initiative = 5
         self.repr_id = 3
 
-class SuperPlant(Plant):
+
+class Dandelion(Plant):
     def __init__(self, position):
-        super(SuperPlant, self).__init__(position)
+        super(Dandelion, self).__init__(position)
         self.spread_chance = 33
         self.repr_id = 4
 
     def action(self):
+        # TODO: jakiś bug
         return SuperSpread(self)
+
 
 class OrganismFactory:
     """docstring for OrganismFactory"""
