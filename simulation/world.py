@@ -1,7 +1,7 @@
 import logging
 
 from simulation.errors import OccupiedFieldException
-from simulation.coordinate import GridCoordinate as Coord, Coordinate
+from simulation.coordinate import GridCoordinate, HexCoordinate, Coordinate
 import simulation.life as life
 
 logger = logging.getLogger(__name__)
@@ -13,10 +13,11 @@ class Board:
     Container for organisms
     """
 
-    def __init__(self, dimensions, wraparound=False):
+    def __init__(self, dimensions, wraparound=False, mode="grid"):
         self.wraparound = wraparound
         self.dimensions = dimensions
         self.organisms = {}
+        self.mode = mode
 
     @staticmethod
     def _handle_dimension_warparound(x, dimension):
@@ -34,7 +35,7 @@ class Board:
         """
         x = self._handle_dimension_warparound(coord.x, self.dimensions[0])
         y = self._handle_dimension_warparound(coord.y, self.dimensions[1])
-        new_coord = Coord(x, y)
+        new_coord = HexCoordinate(x, y) if self.mode == "grid" else GridCoordinate(x, y)
 
         if coord != new_coord:
             logger.debug("wraparound %r -> %r", coord, new_coord)
@@ -108,6 +109,11 @@ class Board:
                 coord = self.handle_warparound(coord)
             del self.organisms[coord]
 
+    def purge(self):
+        """resets board"""
+        logger.warning("Purging board")
+        self.organisms = {}
+
     def by_initiative(self):
         """
         :return: 
@@ -118,11 +124,12 @@ class Board:
 class World:
     """docstring for World"""
 
-    def __init__(self, dimensions, factory=None):
+    def __init__(self, dimensions, factory=None, mode="grid"):
         self.dimensions = dimensions
         self.factory = factory
-        self.board = Board(dimensions, wraparound=True)
+        self.board = Board(dimensions, wraparound=True, mode=mode)
         self.turn_count = 0
+        self.mode = mode
 
     def turn(self):
         self.turn_count += 1
@@ -136,7 +143,11 @@ class World:
             if organism.alive:
                 action = organism.action()
                 try:
-                    action.execute(self.board)
+                    next_action = action.execute(self.board)
+
+                    while next_action is not None:
+                        next_action = next_action.execute(self.board)
+
                 except Exception as e:
                     logger.error("%s during %r", e, action)
                     raise e
@@ -146,7 +157,9 @@ class World:
         # TODO wtf is this hack
         for organism in list(self.board.entities()):
             if not organism.alive:
-                logger.debug("deleting %r", self.board.get_by_coord(organism.position))
+                logger.warning(
+                    "deleting %r", self.board.get_by_coord(organism.position)
+                )
                 self.board.remove(organism.position)
 
         logger.info(
@@ -157,7 +170,10 @@ class World:
         for x in range(self.dimensions[0]):
             for y in range(self.dimensions[1]):
                 organism = list(
-                    filter(lambda o: o.position == Coord(x, y), self.board.entities())
+                    filter(
+                        lambda o: o.position == GridCoordinate(x, y),
+                        self.board.entities(),
+                    )
                 )
                 if organism:
                     print("{}".format(organism[0]), end="")
@@ -170,17 +186,21 @@ class World:
         Populates world with worlds factory, if doesnt exist will create own
         :return:
         """
+        if self.board.organisms:
+            self.board.purge()
+
         if self.factory is None:
-            factory = self.factory = life.OrganismFactory(self.dimensions)
+            factory = self.factory = life.OrganismFactory(
+                self.dimensions, mode=self.mode
+            )
+            factory.register(life.Grass, 5)
+            factory.register(life.Dandelion, 1)
+            factory.register(life.Wolf, 8)
+            factory.register(life.Sheep, 10)
+            factory.register(life.Belladonna, 3)
+            factory.register(life.Guarana, 3)
         else:
             factory = self.factory
-
-        factory.register(life.Grass, 5)
-        factory.register(life.Dandelion, 1)
-        factory.register(life.Wolf, 5)
-        factory.register(life.Sheep, 10)
-        factory.register(life.Belladonna, 3)
-        factory.register(life.Guarana, 3)
 
         for org in factory.generate_registered():
             try:

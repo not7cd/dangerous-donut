@@ -1,4 +1,8 @@
 import re
+import hashlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 _nonbmp = re.compile(r"[\U00010000-\U0010FFFF]")
 
@@ -17,8 +21,10 @@ def with_surrogates(text):
 
 
 def color_from_string(string):
-    r = hash(string + "r")
-    g = hash(string + "g")
-    b = hash(string + "b")
+    m = hashlib.sha1()
+    m.update(string.encode())
+    h = m.hexdigest()[0:12:2]
+    logger.debug("color from %s, #%s", string, h)
 
-    return "#%02x%02x%02x" % (r % 200 + 50, g % 200 + 50, b % 200 + 50)
+    return "#{}".format(h)
+    # return "#%02x%02x%02x" % (r % 200 + 50, g % 200 + 50, b % 200 + 50)

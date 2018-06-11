@@ -47,6 +47,16 @@ class WorldBoard(tk.Frame):
         self.display_mode = mode
         # self.rows = []
 
+        ttk.Style().configure(
+            "Board.TButton",
+            padding=1,
+            width=2,
+            height=15,
+            relief="flat",
+            background="#002200",
+        )
+
+
         self.build_grid()
 
     def build_grid(self):
@@ -65,7 +75,7 @@ class WorldBoard(tk.Frame):
                 row.grid(row=y, column=offset, columnspan=2)
 
                 side = 0 if y % 2 else 2
-                tk.Frame(self, width=7, height=20).grid(row=y, column=side)
+                tk.Frame(self, width=10, height=20).grid(row=y, column=side)
 
             for x in range(self.dimensions[0]):
                 btn = ttk.Button(row)
@@ -96,6 +106,7 @@ class Application(tk.Frame):
         self.board_display = None
         self.quit_btn = None
         self.turn_btn = None
+        self.regen_btn = None
 
         self.logging_stext = None
 
@@ -106,31 +117,45 @@ class Application(tk.Frame):
 
     def create_widgets(self):
         """create and bind control buttons and place them"""
-        self.turn_btn = tk.Button(self, text="TURN", command=self.turn)
-        self.quit_btn = tk.Button(self, text="QUIT", fg="red", command=root.destroy)
+        self.turn_btn = ttk.Button(
+            self, text="TURN", command=self.turn, style="TButton"
+        )
+        self.quit_btn = ttk.Button(
+            self, text="QUIT", command=root.destroy, style="TButton"
+        )
+        self.regen_btn = ttk.Button(self, text="REGENERATE", style="TButton")
 
         self.logging_stext = tkst.ScrolledText(self, state="disabled")
         self.logging_stext.configure(font="TkDefaultFont")
-
-        self.logging_stext.pack(side="left")
-        self.turn_btn.pack(side="bottom")
-        self.quit_btn.pack(side="bottom")
+        self.logging_stext.tag_config("INFO", foreground="black")
+        self.logging_stext.tag_config("DEBUG", foreground="gray")
+        self.logging_stext.tag_config("WARNING", foreground="orange")
+        self.logging_stext.tag_config("ERROR", foreground="red")
+        self.logging_stext.tag_config("CRITICAL", foreground="red", underline=1)
 
     def create_world(self, dimensions=WORLD_DIMENSION):
         """construct world, create board"""
         if self.world:
             raise Exception("world exists")
 
-        world = World(dimensions)
-        world.generate()
+        self.world = World(dimensions, mode="hex")
+        self.board_display = WorldBoard(self, self.world.dimensions, mode="hex")
 
-        OrganismStyler(world.factory.organisms)
+        self.world.generate()
 
-        self.world = world
+        self.regen_btn["command"] = self.regen_world
 
-        self.board_display = WorldBoard(self, world.dimensions)
-        self.board_display.pack(side="right", padx=10, pady=10)
+        OrganismStyler(self.world.factory.organisms)
+
         self.update_board()
+        self.place()
+
+    def place(self):
+        self.board_display.pack(side="right", padx=10, pady=10)
+        self.logging_stext.pack(side="top")
+        self.turn_btn.pack(side="left")
+        self.quit_btn.pack(side="left")
+        self.regen_btn.pack(side="left")
 
     def turn(self):
         """Will execute world turn and update UI board with data from world"""
@@ -141,13 +166,18 @@ class Application(tk.Frame):
     def update_board(self):
         self.board_display.update_with(self.world.board)
 
+    def regen_world(self):
+        self.world.generate()
+        self.update_board()
+        self.logging_stext.configure(state="normal")
+        self.logging_stext.delete(1.0, tk.END)
+        self.logging_stext.configure(state="disabled")
+
 
 if __name__ == "__main__":
 
     root = tk.Tk()
-    ttk.Style().configure(
-        "TButton", padding=1, width=2, height=15, relief="flat", background="#002200"
-    )
+    root.title("Dangerous Donut")
 
     app = Application(master=root)
 

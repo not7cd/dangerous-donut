@@ -122,7 +122,7 @@ class TextHandler(logging.Handler):
 
         def append():
             self.text.configure(state="normal")
-            self.text.insert(tk.END, msg + "\n")
+            self.text.insert(tk.END, msg + "\n", record.levelname)
             self.text.configure(state="disabled")
             # Autoscroll to the bottom
             self.text.yview(tk.END)

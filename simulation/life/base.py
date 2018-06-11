@@ -1,5 +1,5 @@
 from simulation.action import *
-from simulation.coordinate import GridCoordinate as Coord
+from simulation.coordinate import GridCoordinate, HexCoordinate
 from simulation.helpers import with_surrogates
 
 # mappinf for ascii to emoji
@@ -38,6 +38,7 @@ class Organism(ABC):
 
     @abstractmethod
     def action(self):
+        assert self.age != 0
         return DoNothing(self)
 
     # TODO: collision
@@ -52,6 +53,7 @@ class Plant(Organism, ABC):
 
     @abstractmethod
     def action(self):
+        super(Plant, self).action()
         return Spread(self)
 
 
@@ -63,15 +65,17 @@ class Animal(Organism, ABC):
 
     @abstractmethod
     def action(self):
+        super(Animal, self).action()
         return Move(self)
 
 
 class OrganismFactory:
     """docstring for OrganismFactory"""
 
-    def __init__(self, dimensions):
+    def __init__(self, dimensions, mode="grid"):
         self.dimensions = dimensions
         self.organisms_qty = []
+        self.mode = mode
 
     def register(self, organism, qty):
         """
@@ -86,11 +90,9 @@ class OrganismFactory:
     def organisms(self):
         return [org for org, qty in self.organisms_qty]
 
-    def position_generator(self, number):
-        for _ in range(number):
-            yield self.random_position()
-
     def random_position(self):
+        # TODO: hack
+        Coord = HexCoordinate if self.mode == "grid" else GridCoordinate
         return Coord(*tuple(random.randrange(d) for d in self.dimensions)[:2])
 
     def generate(self, organism, qty):

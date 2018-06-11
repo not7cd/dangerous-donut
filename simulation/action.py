@@ -26,36 +26,65 @@ class Action(ABC):
 
 class DoNothing(Action):
     def execute(self, board):
-        logger.info("%r", self)
+        # logger.info("%r", self)
+        pass
 
 
 class Move(Action):
+    def __init__(self, caller):
+        super(Move, self).__init__(caller)
+        self.start_position = self.caller.position
+        self.target_position = random.choice(self.start_position.neighbours)
+
     def execute(self, board):
         logger.info("%r", self)
 
-        start_position = self.caller.position
-        target_position = random.choice(start_position.neighbours)
+        if board.is_occupied(self.target_position):
+            target = board.get_by_coord(self.target_position)
+            if target.alive:
+                logger.debug("occupied by %r", target)
 
-        if board.is_occupied(target_position):
-            target = board.get_by_coord(target_position)
-            logger.debug("occupied by %r", target)
-            fight = Fight(self.caller, target)
-            logger.debug("%r starts fight with %r", self.caller, target)
-            fight.execute(board)
+                if type(self.caller) == type(target):
+                    return Breed(self.caller)
+                else:
+                    return Fight(self.caller, target)
 
-        if self.caller.alive:
-            try:
-                board.move(start_position, target_position)
-            except OccupiedFieldException as e:
-                logger.error("Still occupied!!!")
-                board.remove(target_position)
-                board.move(start_position, target_position)
-                logger.error("Force moving")
+        try:
+            board.move(self.start_position, self.target_position)
+        except OccupiedFieldException as e:
+            logger.warning("Still occupied!!! force move")
+            board.remove(self.target_position)
+            board.move(self.start_position, self.target_position)
+
+        return DoNothing(self.caller)
+
+
+class MoveTo(Move):
+    def __init__(self, caller, target_position):
+        super(MoveTo, self).__init__(caller)
+        self.target_position = target_position
+
+
+class Breed(Action):
+    def __init__(self, caller):
+        super(Breed, self).__init__(caller)
+        self.target_position = random.choice(self.caller.position.neighbours)
+
+    def execute(self, board):
+        logger.info("%r", self)
+
+        cls = type(self.caller)
+        try:
+            board.place_org(cls(self.target_position))
+        except OccupiedFieldException:
+            pass
+
+        return DoNothing(self.caller)
 
 
 class Fight(Action):
     def __init__(self, caller, target):
-        self.caller = caller
+        super(Fight, self).__init__(caller)
         self.target = target
 
     def __repr__(self):
@@ -68,9 +97,12 @@ class Fight(Action):
         if self.caller.strength >= self.target.strength:
             logger.info("%r lost against attacker", self.target)
             self.target.alive = False
+
+            return MoveTo(self.caller, self.target.position)
         else:
             logger.info("%r lost against defender", self.caller)
             self.caller.alive = False
+            return DoNothing(self.caller)
 
 
 class Spread(Action):
@@ -82,6 +114,7 @@ class Spread(Action):
             if not board.is_occupied(new_position):
                 child = self.caller.__class__(new_position)
                 board.place_org(child)
+        return DoNothing(self.caller)
 
 
 class SuperSpread(Spread):
@@ -89,3 +122,4 @@ class SuperSpread(Spread):
         super(SuperSpread, self).execute(board)
         super(SuperSpread, self).execute(board)
         super(SuperSpread, self).execute(board)
+        return DoNothing(self.caller)
