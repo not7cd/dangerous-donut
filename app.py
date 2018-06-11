@@ -3,13 +3,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import scrolledtext as tkst
 
-from gui import Dialog, TextHandler, OrganismStyler
+from gui import Dialog, TextHandler, BoardStylist, ToolTip
 from simulation.coordinate import GridCoordinate as Coord
 from simulation.world import World
 
 WORLD_DIMENSION = (5, 5)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class WorldSizeDialog(Dialog):
@@ -47,16 +47,6 @@ class WorldBoard(tk.Frame):
         self.display_mode = mode
         # self.rows = []
 
-        ttk.Style().configure(
-            "Board.TButton",
-            padding=1,
-            width=2,
-            height=15,
-            relief="flat",
-            background="#002200",
-        )
-
-
         self.build_grid()
 
     def build_grid(self):
@@ -83,6 +73,8 @@ class WorldBoard(tk.Frame):
                 btn.grid(row=0, column=x)
                 self.btns[Coord(x, y)] = btn
 
+                ToolTip(btn, msg="{}, {}".format(x, y), delay=0.1)
+
     def update_with(self, board):
         """
         update grid with data in board
@@ -103,13 +95,6 @@ class WorldBoard(tk.Frame):
 class Application(tk.Frame):
     def __init__(self, master=None):
         super(Application, self).__init__(master)
-        self.board_display = None
-        self.quit_btn = None
-        self.turn_btn = None
-        self.regen_btn = None
-
-        self.logging_stext = None
-
         self.world = None
 
         self.pack()
@@ -145,7 +130,7 @@ class Application(tk.Frame):
 
         self.regen_btn["command"] = self.regen_world
 
-        OrganismStyler(self.world.factory.organisms)
+        BoardStylist(self.world.factory.organisms)
 
         self.update_board()
         self.place()
@@ -153,9 +138,9 @@ class Application(tk.Frame):
     def place(self):
         self.board_display.pack(side="right", padx=10, pady=10)
         self.logging_stext.pack(side="top")
-        self.turn_btn.pack(side="left")
-        self.quit_btn.pack(side="left")
-        self.regen_btn.pack(side="left")
+        self.turn_btn.pack(side="left", padx=5)
+        self.quit_btn.pack(side="left", padx=5)
+        self.regen_btn.pack(side="left", padx=5)
 
     def turn(self):
         """Will execute world turn and update UI board with data from world"""
@@ -168,6 +153,7 @@ class Application(tk.Frame):
 
     def regen_world(self):
         self.world.generate()
+        self.world.turn_count = 0
         self.update_board()
         self.logging_stext.configure(state="normal")
         self.logging_stext.delete(1.0, tk.END)

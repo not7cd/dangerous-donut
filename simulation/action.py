@@ -72,6 +72,8 @@ class Breed(Action):
 
     def execute(self, board):
         logger.info("%r", self)
+        if all(board.is_occupied(ngh) for ngh in self.caller.position.neighbours):
+            return DoNothing(self.caller)
 
         cls = type(self.caller)
         try:
@@ -111,6 +113,10 @@ class Spread(Action):
             logger.info("%r", self)
             start = self.caller.position
             new_position = random.choice(start.neighbours)
+            # check if any is free
+            if all(board.is_occupied(ngh) for ngh in start.neighbours):
+                return DoNothing(self.caller)
+
             if not board.is_occupied(new_position):
                 child = self.caller.__class__(new_position)
                 board.place_org(child)
@@ -119,6 +125,9 @@ class Spread(Action):
 
 class SuperSpread(Spread):
     def execute(self, board):
+        if all(board.is_occupied(ngh) for ngh in self.caller.position.neighbours):
+            return DoNothing(self.caller)
+
         super(SuperSpread, self).execute(board)
         super(SuperSpread, self).execute(board)
         super(SuperSpread, self).execute(board)

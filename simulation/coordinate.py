@@ -33,7 +33,7 @@ class Coordinate(ABC):
         pass
 
     def __repr__(self):
-        return str([self.x, self.y])
+        return "Coord" + str((self.x, self.y))
 
     def __hash__(self):
         return hash((self.x, self.y))
@@ -49,15 +49,6 @@ class GridCoordinate(Coordinate):
         super(GridCoordinate, self).__init__()
         self.x = x
         self.y = y
-
-    def __repr__(self):
-        return str([self.x, self.y])
-
-    def __hash__(self):
-        return hash((self.x, self.y))
-
-    def __eq__(self, other):
-        return (self.x, self.y) == (other.x, other.y)
 
     @property
     def neighbours(self):
