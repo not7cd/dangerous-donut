@@ -199,6 +199,7 @@ class World:
             factory.register(life.Sheep, 10)
             factory.register(life.Belladonna, 3)
             factory.register(life.Guarana, 3)
+            factory.register(life.Hogweed, 10)
         else:
             factory = self.factory
 

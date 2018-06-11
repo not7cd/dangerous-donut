@@ -41,7 +41,12 @@ class Organism(ABC):
         assert self.age != 0
         return DoNothing(self)
 
-    # TODO: collision
+    # TODO:
+    def collide(self):
+        pass
+
+    def kill(self):
+        self.alive = False
 
 
 class Plant(Organism, ABC):

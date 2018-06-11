@@ -16,7 +16,7 @@ class BoardStylist:
             width=2,
             height=15,
             relief="flat",
-            background="#002200",
+            background="#ffffff",
         )
         for organism in organisms:
             logger.debug("Generated {}.Board.TButton".format(organism.__name__))

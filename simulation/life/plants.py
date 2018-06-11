@@ -1,4 +1,4 @@
-from simulation.action import SuperSpread
+from simulation.action import SuperSpread, KillNeighbours
 from simulation.life.base import Plant
 
 
@@ -30,7 +30,13 @@ class Dandelion(Plant):
 
 
 class Hogweed(Plant):
-    pass
+    def __init__(self, position):
+        super(Hogweed, self).__init__(position)
+        self.ascii_repr = "h"
+        self.strength = 10
+
+    def action(self):
+        return KillNeighbours(self)
 
 
 class Belladonna(Plant):

@@ -127,5 +127,3 @@ class TextHandler(logging.Handler):
 
         # This is necessary because we can't modify the Text from other threads
         self.text.after(0, append)
-
-

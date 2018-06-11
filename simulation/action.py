@@ -3,6 +3,7 @@ import logging
 import random
 
 from simulation.errors import OccupiedFieldException
+from simulation.life import base
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +106,17 @@ class Fight(Action):
             logger.info("%r lost against defender", self.caller)
             self.caller.alive = False
             return DoNothing(self.caller)
+
+
+class KillNeighbours(Action):
+    def execute(self, board):
+        logger.info("%r", self)
+        for coord in self.caller.position.neighbours:
+            ngh = board.get_by_coord(coord)
+            if isinstance(ngh, base.Animal):
+                ngh.kill()
+
+        return DoNothing(self.caller)
 
 
 class Spread(Action):

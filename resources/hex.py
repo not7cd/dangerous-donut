@@ -137,7 +137,7 @@ class HexagonalGrid(HexaCanvas):
 if __name__ == "__main__":
     root = Tk()
 
-    grid = HexagonalGrid(root, scale=50, grid_width=4, grid_height=4)
+    grid = HexagonalGrid(root, scale=20, grid_width=10, grid_height=10)
     grid.grid(row=0, column=0, padx=5, pady=5)
 
     def correct_quit(tk):
