@@ -1,4 +1,5 @@
 import logging
+import pickle
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import scrolledtext as tkst
@@ -96,6 +97,7 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super(Application, self).__init__(master)
         self.world = None
+        self.autoplay = tk.IntVar()
 
         self.pack()
         self.create_widgets()
@@ -109,6 +111,8 @@ class Application(tk.Frame):
             self, text="QUIT", command=root.destroy, style="TButton"
         )
         self.regen_btn = ttk.Button(self, text="REGENERATE", style="TButton")
+
+        self.play_btn = tk.Checkbutton(self, text="PLAY", variable=self.autoplay, command=self.autoplay_turn)
 
         self.logging_stext = tkst.ScrolledText(self, state="disabled")
         self.logging_stext.configure(font="TkDefaultFont")
@@ -139,6 +143,7 @@ class Application(tk.Frame):
         self.board_display.pack(side="right", padx=10, pady=10)
         self.logging_stext.pack(side="top")
         self.turn_btn.pack(side="left", padx=5)
+        self.play_btn.pack(side="left", padx=5)
         self.quit_btn.pack(side="left", padx=5)
         self.regen_btn.pack(side="left", padx=5)
 
@@ -158,6 +163,11 @@ class Application(tk.Frame):
         self.logging_stext.configure(state="normal")
         self.logging_stext.delete(1.0, tk.END)
         self.logging_stext.configure(state="disabled")
+
+    def autoplay_turn(self):
+        if self.autoplay:
+            self.turn()
+            self.after(200, self.autoplay_turn)
 
 
 if __name__ == "__main__":
