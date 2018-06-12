@@ -1,59 +1,53 @@
-"""https://code.activestate.com/recipes/576688-tooltip-for-tkinter/"""
+"""https://code.activestate.com/recipes/576688-tooltip-for-tkinter/
+refactored by not7cd"""
 
-from tkinter import *
-from time import time, localtime, strftime
+import tkinter as tk
+from time import time
 
 
-class ToolTip(Toplevel):
+class ToolTip(tk.Toplevel):
     """
     Provides a ToolTip widget for Tkinter.
     To apply a ToolTip to any Tkinter widget, simply pass the widget to the
     ToolTip constructor
     """
 
-    def __init__(self, wdgt, msg=None, msgFunc=None, delay=1, follow=True):
+    def __init__(self, widget, msg=None, msg_function=None, delay=1, follow=True):
         """
         Initialize the ToolTip
-
-        Arguments:
-          wdgt: The widget this ToolTip is assigned to
-          msg:  A static string message assigned to the ToolTip
-          msgFunc: A function that retrieves a string to use as the ToolTip text
-          delay:   The delay in seconds before the ToolTip appears(may be float)
-          follow:  If True, the ToolTip follows motion, otherwise hides
+        
+        :param widget: The widget this ToolTip is assigned to
+        :param msg:  A static string message assigned to the ToolTip
+        :param msg_function: A function that retrieves a string to use as the ToolTip text
+        :param delay:   The delay in seconds before the ToolTip appears(may be float)
+        :param follow:  If True, the ToolTip follows motion, otherwise hides
         """
-        self.wdgt = wdgt
-        self.parent = (
-            self.wdgt.master
-        )  # The parent of the ToolTip is the parent of the ToolTips widget
-        Toplevel.__init__(
-            self, self.parent, bg="black", padx=1, pady=1
-        )  # Initalise the Toplevel
-        self.withdraw()  # Hide initially
-        self.overrideredirect(
-            True
-        )  # The ToolTip Toplevel should have no frame or title bar
+        self.widget = widget
+        self.parent = self.widget.master
+        super(ToolTip, self).__init__(self.parent, bg="black", padx=1, pady=1)
 
-        self.msgVar = (
-            StringVar()
-        )  # The msgVar will contain the text displayed by the ToolTip
-        if msg == None:
-            self.msgVar.set("No message provided")
+        # Hide initially
+        self.withdraw()
+        # The ToolTip Toplevel should have no frame or title bar
+        self.overrideredirect(True)
+
+        # The msg_var will contain the text displayed by the ToolTip
+        self.msg_var = tk.StringVar()
+        if msg is None:
+            self.msg_var.set("No message provided")
         else:
-            self.msgVar.set(msg)
-        self.msgFunc = msgFunc
+            self.msg_var.set(msg)
+        self.msg_function = msg_function
         self.delay = delay
         self.follow = follow
         self.visible = 0
-        self.lastMotion = 0
-        Message(
-            self, textvariable=self.msgVar, bg="#FFFFDD", aspect=1000
-        ).grid()  # The test of the ToolTip is displayed in a Message widget
-        self.wdgt.bind(
-            "<Enter>", self.spawn, "+"
-        )  # Add bindings to the widget.  This will NOT override bindings that the widget already has
-        self.wdgt.bind("<Leave>", self.hide, "+")
-        self.wdgt.bind("<Motion>", self.move, "+")
+        self.last_motion = 0
+        # The test of the ToolTip is displayed in a Message widget ???
+        tk.Message(self, textvariable=self.msg_var, bg="#FFFFDD", aspect=1000).grid()
+        # Add bindings to the widget.  This will NOT override bindings that the widget already has
+        self.widget.bind("<Enter>", self.spawn, "+")
+        self.widget.bind("<Leave>", self.hide, "+")
+        self.widget.bind("<Motion>", self.move, "+")
 
     def spawn(self, event=None):
         """
@@ -64,15 +58,13 @@ class ToolTip(Toplevel):
           event: The event that called this funciton
         """
         self.visible = 1
-        self.after(
-            int(self.delay * 1000), self.show
-        )  # The after function takes a time argument in miliseconds
+        self.after(int(self.delay * 1000), self.show)
 
     def show(self):
         """
         Displays the ToolTip if the time delay has been long enough
         """
-        if self.visible == 1 and time() - self.lastMotion > self.delay:
+        if self.visible == 1 and time() - self.last_motion > self.delay:
             self.visible = 2
         if self.visible == 2:
             self.deiconify()
@@ -80,23 +72,18 @@ class ToolTip(Toplevel):
     def move(self, event):
         """
         Processes motion within the widget.
-
-        Arguments:
-          event: The event that called this function
+        :param event: The event that called this function
         """
-        self.lastMotion = time()
-        if (
-            self.follow == False
-        ):  # If the follow flag is not set, motion within the widget will make the ToolTip dissapear
+        self.last_motion = time()
+        # If the follow flag is not set, motion within the widget will make the ToolTip dissapear
+        if not self.follow:
             self.withdraw()
             self.visible = 1
-        self.geometry(
-            "+%i+%i" % (event.x_root + 10, event.y_root + 10)
-        )  # Offset the ToolTip 10x10 pixes southwest of the pointer
+        # Offset the ToolTip 10x10 pixes southwest of the pointer
+        self.geometry("+%i+%i" % (event.x_root + 10, event.y_root + 10))
         try:
-            self.msgVar.set(
-                self.msgFunc()
-            )  # Try to call the message function.  Will not change the message if the message function is None or the message function fails
+            # Try to call the message function.  Will not change the message if the message function is None or the message function fails
+            self.msg_var.set(self.msg_function())
         except:
             pass
         self.after(int(self.delay * 1000), self.show)
@@ -104,77 +91,50 @@ class ToolTip(Toplevel):
     def hide(self, event=None):
         """
         Hides the ToolTip.  Usually this is caused by leaving the widget
-
-        Arguments:
-          event: The event that called this function
+        :param event: The event that called this function
         """
         self.visible = 0
         self.withdraw()
 
 
-def xrange2d(n, m):
-    """
-    Returns a generator of values in a 2d range
-
-    Arguments:
-      n: The number of rows in the 2d range
-      m: The number of columns in the 2d range
-    Returns:
-      A generator of values in a 2d range
-    """
-    return ((i, j) for i in range(n) for j in range(m))
-
-
-def range2d(n, m):
-    """
-    Returns a list of values in a 2d range
-
-    Arguments:
-      n: The number of rows in the 2d range
-      m: The number of columns in the 2d range
-    Returns:
-      A list of values in a 2d range
-    """
-    return [(i, j) for i in range(n) for j in range(m)]
-
-
-def print_time():
-    """
-    Prints the current time in the following format:
-    HH:MM:SS.00
-    """
-    t = time()
-    timeString = "time="
-    timeString += strftime("%H:%M:", localtime(t))
-    timeString += "%.2f" % (t % 60,)
-    return timeString
-
-
-def main():
-    root = Tk()
-    btnList = []
-    for (i, j) in range2d(6, 4):
-        text = "delay=%i\n" % i
-        delay = i
-        if j >= 2:
-            follow = True
-            text += "+follow\n"
-        else:
-            follow = False
-            text += "-follow\n"
-        if j % 2 == 0:
-            msg = None
-            msgFunc = print_time
-            text += "Message Function"
-        else:
-            msg = "Button at %s" % str((i, j))
-            msgFunc = None
-            text += "Static Message"
-        btnList.append(Button(root, text=text))
-        ToolTip(btnList[-1], msg=msg, msgFunc=msgFunc, follow=follow, delay=delay)
-        btnList[-1].grid(row=i, column=j, sticky=N + S + E + W)
-    root.mainloop()
-
-
 if __name__ == "__main__":
-    main()
+    from time import localtime, strftime
+
+    root = tk.Tk()
+
+    def print_time():
+        """
+        Prints the current time in the following format:
+        HH:MM:SS.00
+        """
+        t = time()
+        timeString = "time="
+        timeString += strftime("%H:%M:", localtime(t))
+        timeString += "%.2f" % (t % 60,)
+        return timeString
+
+    for i in range(6):
+        for j in range(4):
+            text = "delay=%i\n" % i
+            delay = i
+            if j >= 2:
+                follow = True
+                text += "+follow\n"
+            else:
+                follow = False
+                text += "-follow\n"
+            if j % 2 == 0:
+                msg = None
+                msg_function = print_time
+                text += "Message Function"
+            else:
+                msg = "Button at %s" % str((i, j))
+                msg_function = None
+                text += "Static Message"
+
+            btn = tk.Button(root, text=text)
+            btn.grid(row=i, column=j, sticky=tk.N + tk.S + tk.E + tk.W)
+
+            ToolTip(btn, msg=msg, msg_function=msg_function, follow=follow, delay=delay)
+
+    root.mainloop()

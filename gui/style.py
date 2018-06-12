@@ -1,7 +1,6 @@
 import logging
 from tkinter import ttk
 
-from simulation.helpers import color_from_string
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +21,6 @@ class BoardStylist:
             logger.debug("Generated {}.Board.TButton".format(organism.__name__))
             self.styles.append(
                 ttk.Style().configure(
-                    "{}.Board.TButton".format(organism.__name__),
-                    foreground=color_from_string(organism.__name__),
+                    "{}.Board.TButton".format(organism.__name__), foreground="black"
                 )
             )

@@ -1,14 +1,10 @@
 import logging
-import pickle
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import scrolledtext as tkst
 
-from gui import Dialog, TextHandler, BoardStylist, ToolTip
-from simulation.coordinate import GridCoordinate as Coord
-from simulation.world import World
+from gui import Dialog, TextHandler, BoardStylist, ToolTip, LoggerScrolledText
 
-WORLD_DIMENSION = (5, 5)
+WORLD_DIMENSION = (16, 16)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,18 +31,43 @@ class WorldSizeDialog(Dialog):
         self.result = (x, y)
 
 
+class FieldButton(tk.Button):
+    """Wraped Button for easier size manipulation"""
+
+    def __init__(self, master, height=20, width=20, **kwargs):
+        self.wrapper = tk.Frame(master, height=height, width=width)
+        self.wrapper.pack_propagate(False)
+
+        super(FieldButton, self).__init__(self.wrapper, **kwargs)
+        super(FieldButton, self).pack(fill=tk.BOTH, expand=1)
+
+    def grid(self, *args, **kwargs):
+        # passing position config to wrapper
+        self.wrapper.grid(*args, **kwargs)
+
+    def pack(self, *args, **kwargs):
+        # passing position config to wrapper
+        self.wrapper.pack(*args, **kwargs)
+
+    def config(self, height=None, width=None, **kwargs):
+        # passing height, width config to wrapper
+        if height:
+            self.wrapper.config(height=height)
+        if width:
+            self.wrapper.config(width=width)
+        super(FieldButton, self).config(**kwargs)
+
+
 class WorldBoard(tk.Frame):
-    def __init__(self, master=None, dimensions=WORLD_DIMENSION, mode="grid"):
+    def __init__(self, master=None, dimensions=WORLD_DIMENSION):
         """
         :param master: parent widget
         :param dimensions: tuple of world size (x, y)
         :param mode: "grid" or "hex"
         """
-        super().__init__(master)
+        super(WorldBoard, self).__init__(master)
         self.dimensions = dimensions
         self.btns = {}
-        self.display_mode = mode
-        # self.rows = []
 
         self.build_grid()
 
@@ -54,27 +75,17 @@ class WorldBoard(tk.Frame):
         """build grid of buttons"""
         if self.btns:
             raise Exception("grid exists")
-            # TODO: delete all children instead raising exc
 
         for y in range(self.dimensions[1]):
             row = tk.Frame(self)
-            # TODO: should check for subclass of coord
-            if self.display_mode == "grid":
-                row.grid(row=y, column=0)
-            elif self.display_mode == "hex":
-                offset = 1 if y % 2 else 0
-                row.grid(row=y, column=offset, columnspan=2)
-
-                side = 0 if y % 2 else 2
-                tk.Frame(self, width=10, height=20).grid(row=y, column=side)
+            row.grid(row=y, column=0)
 
             for x in range(self.dimensions[0]):
-                btn = ttk.Button(row)
-                btn["text"] = " "
+                btn = FieldButton(row, text=" ")
                 btn.grid(row=0, column=x)
-                self.btns[Coord(x, y)] = btn
-
                 ToolTip(btn, msg="{}, {}".format(x, y), delay=0.1)
+
+                self.btns[(x, y)] = btn
 
     def update_with(self, board):
         """
@@ -101,6 +112,7 @@ class Application(tk.Frame):
 
         self.pack()
         self.create_widgets()
+        self.place()
 
     def create_widgets(self):
         """create and bind control buttons and place them"""
@@ -121,21 +133,14 @@ class Application(tk.Frame):
             offvalue=False,
         )
 
-        self.logging_stext = tkst.ScrolledText(self, state="disabled")
-        self.logging_stext.configure(font="TkDefaultFont")
-        self.logging_stext.tag_config("INFO", foreground="black")
-        self.logging_stext.tag_config("DEBUG", foreground="gray")
-        self.logging_stext.tag_config("WARNING", foreground="orange")
-        self.logging_stext.tag_config("ERROR", foreground="red")
-        self.logging_stext.tag_config("CRITICAL", foreground="red", underline=1)
+        self.logging_text = LoggerScrolledText(self)
+
+        self.board_display = WorldBoard(self, WORLD_DIMENSION)
 
     def create_world(self, dimensions=WORLD_DIMENSION):
         """construct world, create board"""
         if self.world:
             raise Exception("world exists")
-
-        self.world = World(dimensions, mode="hex")
-        self.board_display = WorldBoard(self, self.world.dimensions, mode="hex")
 
         self.world.generate()
 
@@ -148,7 +153,7 @@ class Application(tk.Frame):
 
     def place(self):
         self.board_display.pack(side="right", padx=10, pady=10)
-        self.logging_stext.pack(side="top")
+        self.logging_text.pack(side="top")
         self.turn_btn.pack(side="left", padx=5)
         self.play_btn.pack(side="left", padx=5)
         self.quit_btn.pack(side="left", padx=5)
@@ -167,12 +172,9 @@ class Application(tk.Frame):
         self.world.generate()
         self.world.turn_count = 0
         self.update_board()
-        self.logging_stext.configure(state="normal")
-        self.logging_stext.delete(1.0, tk.END)
-        self.logging_stext.configure(state="disabled")
 
     def autoplay_turn(self):
-        if self.autoplay.get() == True:
+        if self.autoplay.get():
             self.turn()
             self.after(200, self.autoplay_turn)
 
@@ -185,13 +187,12 @@ if __name__ == "__main__":
     app = Application(master=root)
 
     # create logging handler from text widget inside app
-    text_handler = TextHandler(app.logging_stext)
     logger = logging.getLogger()
-    logger.addHandler(text_handler)
+    logger.addHandler(TextHandler(app.logging_text))
 
     # ask for initial conditions and create world with them
-    dialog = WorldSizeDialog(root, "Enter world size")
-    app.create_world(dialog.result)
+    # dialog = WorldSizeDialog(root, "Enter world size")
+    # app.create_world(dialog.result)
 
     # enter main loop
     app.mainloop()
