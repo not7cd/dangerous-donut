@@ -1,2 +1,0 @@
-class OccupiedFieldException(Exception):
-    pass
