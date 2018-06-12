@@ -1,4 +1,5 @@
-from simulation.life.base import Animal
+from simulation.life import Animal
+from simulation.action import Move
 
 
 class Sheep(Animal):
@@ -9,7 +10,8 @@ class Sheep(Animal):
         self.strength = 4
 
     def action(self):
-        return super(Sheep, self).action()
+        super(Sheep, self).action()
+        return Move(self)
 
 
 class Wolf(Animal):
@@ -20,7 +22,8 @@ class Wolf(Animal):
         self.strength = 9
 
     def action(self):
-        return super(Wolf, self).action()
+        super(Wolf, self).action()
+        return Move(self)
 
 
 class Antelope(Animal):
@@ -36,4 +39,12 @@ class Turtle(Animal):
 
 
 class CyberSheep(Animal):
-    pass
+    def __init__(self, position):
+        super(CyberSheep, self).__init__(position)
+        self.ascii_repr = "§"
+        self.initiative = 4
+        self.strength = 11
+
+    def action(self):
+        super(CyberSheep, self).action()
+        return Move(self)

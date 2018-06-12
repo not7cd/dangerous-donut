@@ -1,6 +1,10 @@
-from simulation.action import *
+from abc import *
+import random
+import logging
 from simulation.coordinate import GridCoordinate, HexCoordinate
 from simulation.helpers import with_surrogates
+
+# TODO: w akcjach potrzebne są klasy abstrakcyjne więc mam zapętlone importy te klasy nie powinny mieć akcji bo śą używane do rozpoznowania akcji
 
 # mappinf for ascii to emoji
 ASCII_EMOJI = {"o": "🐛", "p": "🌱", "A": "🐾", "W": "🐺", "d": "🌼"}
@@ -39,7 +43,6 @@ class Organism(ABC):
     @abstractmethod
     def action(self):
         assert self.age != 0
-        return DoNothing(self)
 
     # TODO:
     def collide(self):
@@ -53,13 +56,12 @@ class Plant(Organism, ABC):
     @abstractmethod
     def __init__(self, position):
         super(Plant, self).__init__(position)
-        self.spread_chance = 25
+        self.spread_chance = 10
         self.ascii_repr = "p"
 
     @abstractmethod
     def action(self):
         super(Plant, self).action()
-        return Spread(self)
 
 
 class Animal(Organism, ABC):
@@ -71,7 +73,6 @@ class Animal(Organism, ABC):
     @abstractmethod
     def action(self):
         super(Animal, self).action()
-        return Move(self)
 
 
 class OrganismFactory:

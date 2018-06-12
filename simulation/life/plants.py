@@ -1,5 +1,5 @@
-from simulation.action import SuperSpread, KillNeighbours
-from simulation.life.base import Plant
+from simulation.action import SuperSpread, KillNeighbours, Spread
+from simulation.life import Plant
 
 
 class Grass(Plant):
@@ -8,7 +8,8 @@ class Grass(Plant):
         self.ascii_repr = ","
 
     def action(self):
-        return super(Grass, self).action()
+        super(Grass, self).action()
+        return Spread(self)
 
 
 class Guarana(Plant):
@@ -17,7 +18,8 @@ class Guarana(Plant):
         self.ascii_repr = "g"
 
     def action(self):
-        return super(Guarana, self).action()
+        super(Guarana, self).action()
+        return Spread(self)
 
 
 class Dandelion(Plant):
@@ -26,6 +28,7 @@ class Dandelion(Plant):
         self.ascii_repr = "d"
 
     def action(self):
+        super(Dandelion, self).action()
         return SuperSpread(self)
 
 
@@ -36,6 +39,7 @@ class Hogweed(Plant):
         self.strength = 10
 
     def action(self):
+        super(Hogweed, self).action()
         return KillNeighbours(self)
 
 
@@ -46,4 +50,5 @@ class Belladonna(Plant):
         self.strength = 99
 
     def action(self):
-        return super(Belladonna, self).action()
+        super(Belladonna, self).action()
+        return Spread(self)

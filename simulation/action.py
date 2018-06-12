@@ -3,7 +3,7 @@ import logging
 import random
 
 from simulation.errors import OccupiedFieldException
-from simulation.life import base
+from simulation.life import Animal, animals
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class KillNeighbours(Action):
         logger.info("%r", self)
         for coord in self.caller.position.neighbours:
             ngh = board.get_by_coord(coord)
-            if isinstance(ngh, base.Animal):
+            if isinstance(ngh, Animal) and not isinstance(ngh, animals.CyberSheep):
                 ngh.kill()
 
         return DoNothing(self.caller)

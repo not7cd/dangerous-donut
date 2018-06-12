@@ -112,7 +112,7 @@ class Board:
     def purge(self):
         """resets board"""
         logger.warning("Purging board")
-        self.organisms = {}
+        self.organisms.clear()
 
     def by_initiative(self):
         """
@@ -193,13 +193,14 @@ class World:
             factory = self.factory = life.OrganismFactory(
                 self.dimensions, mode=self.mode
             )
-            factory.register(life.Grass, 5)
+            factory.register(life.Grass, 20)
             factory.register(life.Dandelion, 1)
-            factory.register(life.Wolf, 8)
+            factory.register(life.Wolf, 5)
             factory.register(life.Sheep, 10)
-            factory.register(life.Belladonna, 3)
+            factory.register(life.Belladonna, 1)
             factory.register(life.Guarana, 3)
             factory.register(life.Hogweed, 10)
+            factory.register(life.CyberSheep, 3)
         else:
             factory = self.factory
 

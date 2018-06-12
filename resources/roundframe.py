@@ -6,7 +6,9 @@ from tkinter import ttk
 
 root = tkinter.Tk()
 
-img1 = tkinter.PhotoImage("frameFocusBorder", data="""
+img1 = tkinter.PhotoImage(
+    "frameFocusBorder",
+    data="""
 R0lGODlhQABAAPcAAHx+fMTCxKSipOTi5JSSlNTS1LSytPTy9IyKjMzKzKyq
 rOzq7JyanNza3Ly6vPz6/ISChMTGxKSmpOTm5JSWlNTW1LS2tPT29IyOjMzO
 zKyurOzu7JyenNze3Ly+vPz+/OkAKOUA5IEAEnwAAACuQACUAAFBAAB+AFYd
@@ -44,9 +46,12 @@ gLIHBijwLQEYePzx0kw37fTSSjuMr7ZMzfcgYZUZi58DGsTKwbdgayt22GSP
 bXbYY3MggQIaONDzAJ8R9kFlQheQQAAOWGCAARrwdt23Bn8H7vfggBMueOEG
 WOBBAAkU0EB9oBGUdXIFZJBABAEEsPjmmnfO+eeeh/55BBEk0Ph/E8Q9meQq
 bbDABAN00EADFRRQ++2254777rr3jrvjFTTQwQCpz7u6QRut5/oEzA/g/PPQ
-Ry/99NIz//oGrZpUUEAAOw==""")
+Ry/99NIz//oGrZpUUEAAOw==""",
+)
 
-img2 = tkinter.PhotoImage("frameBorder", data="""
+img2 = tkinter.PhotoImage(
+    "frameBorder",
+    data="""
 R0lGODlhQABAAPcAAHx+fMTCxKSipOTi5JSSlNTS1LSytPTy9IyKjMzKzKyq
 rOzq7JyanNza3Ly6vPz6/ISChMTGxKSmpOTm5JSWlNTW1LS2tPT29IyOjMzO
 zKyurOzu7JyenNze3Ly+vPz+/OkAKOUA5IEAEnwAAACuQACUAAFBAAB+AFYd
@@ -82,29 +87,36 @@ CwEA/Pbr778ABywwABBAgAAG7xpAq6mGUUTdAPZ6YIACsRKAAbvtZqzxxhxn
 jDG3ybbKFHf36ZVYpuE5oIGhHMTqcqswvyxzzDS/HDMHEiiggQMLDxCZXh8k
 BnEBCQTggAUGGKCB0ktr0PTTTEfttNRQT22ABR4EkEABDXgnGUEn31ZABglE
 EEAAWaeN9tpqt832221HEEECW6M3wc+Hga3SBgtMODBABw00UEEBgxdO+OGG
-J4744oZzXUEDHQxwN7F5G7QRdXxPoPkAnHfu+eeghw665n1vIKhJBQUEADs=""")
+J4744oZzXUEDHQxwN7F5G7QRdXxPoPkAnHfu+eeghw665n1vIKhJBQUEADs=""",
+)
 
 style = ttk.Style()
 
-style.element_create("RoundedFrame", "image", "frameBorder",
-    ("focus", "frameFocusBorder"), border=16, sticky="nsew")
+style.element_create(
+    "RoundedFrame",
+    "image",
+    "frameBorder",
+    ("focus", "frameFocusBorder"),
+    border=16,
+    sticky="nsew",
+)
 
 style.layout("RoundedFrame", [("RoundedFrame", {"sticky": "nsew"})])
 style.configure("TEntry", borderwidth=0)
 
 frame = ttk.Frame(style="RoundedFrame", padding=10)
-frame.pack(fill='x')
+frame.pack(fill="x")
 
 frame2 = ttk.Frame(style="RoundedFrame", padding=10)
-frame2.pack(fill='both', expand=1)
+frame2.pack(fill="both", expand=1)
 
-entry = ttk.Entry(frame, text='Test')
-entry.pack(fill='x')
+entry = ttk.Entry(frame, text="Test")
+entry.pack(fill="x")
 entry.bind("<FocusIn>", lambda evt: frame.state(["focus"]))
 entry.bind("<FocusOut>", lambda evt: frame.state(["!focus"]))
 
 text = tkinter.Text(frame2, borderwidth=0, bg="white", highlightthickness=0)
-text.pack(fill='both', expand=1)
+text.pack(fill="both", expand=1)
 text.bind("<FocusIn>", lambda evt: frame2.state(["focus"]))
 text.bind("<FocusOut>", lambda evt: frame2.state(["!focus"]))
 

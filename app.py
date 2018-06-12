@@ -97,7 +97,7 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super(Application, self).__init__(master)
         self.world = None
-        self.autoplay = tk.IntVar()
+        self.autoplay = tk.BooleanVar()
 
         self.pack()
         self.create_widgets()
@@ -112,7 +112,14 @@ class Application(tk.Frame):
         )
         self.regen_btn = ttk.Button(self, text="REGENERATE", style="TButton")
 
-        self.play_btn = tk.Checkbutton(self, text="PLAY", variable=self.autoplay, command=self.autoplay_turn)
+        self.play_btn = tk.Checkbutton(
+            self,
+            text="PLAY",
+            variable=self.autoplay,
+            command=self.autoplay_turn,
+            onvalue=True,
+            offvalue=False,
+        )
 
         self.logging_stext = tkst.ScrolledText(self, state="disabled")
         self.logging_stext.configure(font="TkDefaultFont")
@@ -165,7 +172,7 @@ class Application(tk.Frame):
         self.logging_stext.configure(state="disabled")
 
     def autoplay_turn(self):
-        if self.autoplay:
+        if self.autoplay.get() == True:
             self.turn()
             self.after(200, self.autoplay_turn)
 
