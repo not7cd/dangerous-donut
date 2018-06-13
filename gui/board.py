@@ -33,6 +33,7 @@ class FieldButton(tk.Button):
 class WorldBoard(tk.Frame):
     def __init__(self, master=None, dimensions=(16, 16)):
         """
+        Grid of buttons
         :param master: parent widget
         :param dimensions: tuple of world size (x, y)
         """
@@ -40,9 +41,9 @@ class WorldBoard(tk.Frame):
         self.dimensions = dimensions
         self.btns = {}
 
-        self.build_grid()
+        self.build()
 
-    def build_grid(self):
+    def build(self):
         """build grid of buttons"""
         if self.btns:
             raise Exception("grid exists")
